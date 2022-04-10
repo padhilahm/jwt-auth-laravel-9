@@ -98,14 +98,18 @@ class UserController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
         if ($request->has('password')) {
-            $user = User::find($id);
             $user->name = $request->name;
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
             $user->save();
         } else {
-            $user = User::find($id);
             $user->name = $request->name;
             $user->email = $request->email;
             $user->save();
