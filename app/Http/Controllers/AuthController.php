@@ -32,12 +32,12 @@ class AuthController extends Controller
         ]);
         if ($validator->fails()) {
             return response()->json([
-                'success' => false,
-                'message' => $validator->errors()
+                'message' => 'Validation Failed',
+                'errors' => $validator->errors()
             ], 422);
         }
         if (!$token = auth()->attempt($validator->validated())) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
         return $this->createNewToken($token);
     }
@@ -57,7 +57,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'Validation Failed',
                 'errors' => $validator->errors()
-            ], 400);
+            ], 422);
         }
         $user = User::create(array_merge(
             $validator->validated(),
@@ -95,7 +95,10 @@ class AuthController extends Controller
      */
     public function userProfile()
     {
-        return response()->json(auth()->user());
+        return response()->json([
+            'message' => 'User successfully fetched',
+            'data' => auth()->user()->role
+        ]);
     }
     /**
      * Get the token array structure.
@@ -106,10 +109,11 @@ class AuthController extends Controller
      */
     protected function createNewToken($token)
     {
+        // 3600 s
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 600,
+            'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => auth()->user()
         ]);
     }
